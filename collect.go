@@ -13,6 +13,8 @@ type fileInfo struct {
 	size int64
 }
 
+// Reserved characters and words for filename validation
+// See: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 const (
 	characterFilter = `[\x00-\x1F\\/:*?"<>|@!]` // Some FAT systems don't allow @ and ! in filenames
 	defaultName     = "file"
@@ -23,14 +25,51 @@ var (
 	characterFilterRegex = regexp.MustCompile(characterFilter)
 
 	dosReservedNames = map[string]struct{}{
-		"CON": {}, "PRN": {}, "AUX": {}, "NUL": {}, "CLOCK$": {}, "CONFIG$": {}, "SCREEN$": {}, "$IDLE$": {},
-		"COM0": {}, "COM1": {}, "COM2": {}, "COM3": {}, "COM4": {}, "COM5": {}, "COM6": {}, "COM7": {}, "COM8": {}, "COM9": {},
-		"LPT0": {}, "LPT1": {}, "LPT2": {}, "LPT3": {}, "LPT4": {}, "LPT5": {}, "LPT6": {}, "LPT7": {}, "LPT8": {}, "LPT9": {},
+		"CON":     {},
+		"PRN":     {},
+		"AUX":     {},
+		"NUL":     {},
+		"CLOCK$":  {},
+		"CONFIG$": {},
+		"SCREEN$": {},
+		"$IDLE$":  {},
+		"COM0":    {},
+		"COM1":    {},
+		"COM2":    {},
+		"COM3":    {},
+		"COM4":    {},
+		"COM5":    {},
+		"COM6":    {},
+		"COM7":    {},
+		"COM8":    {},
+		"COM9":    {},
+		"LPT0":    {},
+		"LPT1":    {},
+		"LPT2":    {},
+		"LPT3":    {},
+		"LPT4":    {},
+		"LPT5":    {},
+		"LPT6":    {},
+		"LPT7":    {},
+		"LPT8":    {},
+		"LPT9":    {},
 	}
 
 	windowsReservedNames = map[string]struct{}{
-		"$Mft": {}, "$MftMirr": {}, "$LogFile": {}, "$Volume": {}, "$AttrDef": {}, "$Bitmap": {}, "$Boot": {}, "$BadClus": {},
-		"$Secure": {}, "$Upcase": {}, "$Extend": {}, "$Quota": {}, "$ObjId": {}, "$Reparse": {},
+		"$Mft":     {},
+		"$MftMirr": {},
+		"$LogFile": {},
+		"$Volume":  {},
+		"$AttrDef": {},
+		"$Bitmap":  {},
+		"$Boot":    {},
+		"$BadClus": {},
+		"$Secure":  {},
+		"$Upcase":  {},
+		"$Extend":  {},
+		"$Quota":   {},
+		"$ObjId":   {},
+		"$Reparse": {},
 	}
 )
 
