@@ -30,7 +30,9 @@ func TestPartitionFiles(t *testing.T) {
 func TestMakePartitions(t *testing.T) {
 	tempDir := t.TempDir()
 	originalDir := filepath.Join(tempDir, "original")
-	os.Mkdir(originalDir, os.ModePerm)
+	if err := os.Mkdir(originalDir, os.ModePerm); err != nil {
+		t.Fatalf("error creating directory: %v", err)
+	}
 
 	createTestFiles(t, originalDir, []string{"file1.txt", "file2.txt", "file3.txt", "file4.txt"})
 
@@ -40,7 +42,9 @@ func TestMakePartitions(t *testing.T) {
 	}
 
 	for _, d := range outputDirs {
-		os.Mkdir(d, os.ModePerm)
+		if err := os.Mkdir(d, os.ModePerm); err != nil {
+			t.Fatalf("error creating directory: %v", err)
+		}
 	}
 
 	config := PartitionConfig{
