@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 
 	"github.com/ezrantn/treecut"
 )
@@ -18,8 +18,7 @@ func main() {
 		BySize:     false,
 	}
 
-	err := treecut.MakePartitions(config)
-	if err != nil {
-		log.Fatal(err)
+	if err := treecut.MakePartitions(config); err != nil {
+		slog.Error(err.Error())
 	}
 }

@@ -8,7 +8,7 @@ import (
 type PartitionConfig struct {
 	SourceDir  string   // Original directory
 	OutputDirs []string // Partition directories
-	BySize     bool
+	BySize     bool     // Set to true to activate partition by size (largest -> smallest)
 }
 
 // partitionFiles splits a list of file paths into `partitions` equal groups
@@ -46,14 +46,14 @@ func MakePartitions(config PartitionConfig) error {
 	}
 }
 
-func partitionFilesBySize(files []FileInfo, partitions int) [][]FileInfo {
+func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
 	// Sort files by size (largest first)
 	sort.Slice(files, func(i, j int) bool {
-		return files[i].Size > files[j].Size
+		return files[i].size > files[j].size
 	})
 
 	// Create partitions buckets
-	result := make([][]FileInfo, partitions)
+	result := make([][]fileInfo, partitions)
 	sizes := make([]int64, partitions) // Track partitions sizes
 
 	for _, file := range files {
@@ -66,7 +66,7 @@ func partitionFilesBySize(files []FileInfo, partitions int) [][]FileInfo {
 		}
 		// Assign file to the partition
 		result[minIndex] = append(result[minIndex], file)
-		sizes[minIndex] += file.Size
+		sizes[minIndex] += file.size
 	}
 
 	return result

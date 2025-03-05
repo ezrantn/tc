@@ -73,7 +73,7 @@ func TestMakePartitions(t *testing.T) {
 }
 
 func TestPartitionFilesBySize(t *testing.T) {
-	files := []FileInfo{
+	files := []fileInfo{
 		{"a.txt", 100},
 		{"b.txt", 200},
 		{"c.txt", 300},
@@ -92,11 +92,11 @@ func TestPartitionFilesBySize(t *testing.T) {
 	// Validate total size balancing
 	size1, size2 := int64(0), int64(0)
 	for _, f := range result[0] {
-		size1 += f.Size
+		size1 += f.size
 	}
 
 	for _, f := range result[1] {
-		size2 += f.Size
+		size2 += f.size
 	}
 
 	if abs(size1-size2) > 100 {

@@ -28,14 +28,14 @@ func createSymlinkTree(files [][]string, outputDirs []string) error {
 	return nil
 }
 
-func createSymlinkTreeSize(files [][]FileInfo, outputDirs []string) error {
+func createSymlinkTreeSize(files [][]fileInfo, outputDirs []string) error {
 	for i, partition := range files {
 		for _, file := range partition {
-			linkPath := filepath.Join(outputDirs[i], filepath.Base(file.Path))
+			linkPath := filepath.Join(outputDirs[i], filepath.Base(file.path))
 			if err := os.MkdirAll(filepath.Dir(linkPath), os.ModePerm); err != nil {
 				return err
 			}
-			if err := os.Symlink(file.Path, linkPath); err != nil {
+			if err := os.Symlink(file.path, linkPath); err != nil {
 				return err
 			}
 		}

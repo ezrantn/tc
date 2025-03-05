@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 )
 
-type FileInfo struct {
-	Path string
-	Size int64
+type fileInfo struct {
+	path string
+	size int64
 }
 
 // collectFiles walks through the source directory and returns all file paths
@@ -47,8 +47,8 @@ func collectFiles(sourceDir string) ([]string, error) {
 }
 
 // collectFilesWithSize collects file paths and sizes
-func collectFilesWithSize(sourceDir string) ([]FileInfo, error) {
-	var files []FileInfo
+func collectFilesWithSize(sourceDir string) ([]fileInfo, error) {
+	var files []fileInfo
 	err := filepath.WalkDir(sourceDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -60,7 +60,7 @@ func collectFilesWithSize(sourceDir string) ([]FileInfo, error) {
 				return err
 			}
 
-			files = append(files, FileInfo{Path: path, Size: info.Size()})
+			files = append(files, fileInfo{path: path, size: info.Size()})
 		}
 
 		return nil
