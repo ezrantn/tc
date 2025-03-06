@@ -13,7 +13,15 @@ type PartitionConfig struct {
 
 // partitionFiles splits a list of file paths into `partitions` equal groups
 func partitionFiles(files []string, partitions int) [][]string {
+	// Preallocate slices with estimated capacity
 	result := make([][]string, partitions)
+	avgSize := (len(files) + partitions - 1) / partitions // Ceiling division
+
+	for i := range result {
+		result[i] = make([]string, 0, avgSize) // Preallocate capacity
+	}
+
+	// Distribute files into partitions
 	for i, file := range files {
 		result[i%partitions] = append(result[i%partitions], file)
 	}

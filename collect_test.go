@@ -9,6 +9,7 @@ import (
 // Helper function to create temporary test files
 func createTestFiles(t *testing.T, dir string, filenames []string) {
 	t.Helper()
+
 	for _, name := range filenames {
 		path := filepath.Join(dir, name)
 		f, err := os.Create(path)
