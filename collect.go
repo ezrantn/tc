@@ -56,40 +56,64 @@ var (
 	}
 
 	windowsReservedNames = map[string]struct{}{
-		"$Mft":     {},
-		"$MftMirr": {},
-		"$LogFile": {},
-		"$Volume":  {},
-		"$AttrDef": {},
-		"$Bitmap":  {},
-		"$Boot":    {},
-		"$BadClus": {},
-		"$Secure":  {},
-		"$Upcase":  {},
-		"$Extend":  {},
-		"$Quota":   {},
-		"$ObjId":   {},
-		"$Reparse": {},
+		"$MFT":     {},
+		"$MFTMIRR": {},
+		"$LOGFILE": {},
+		"$VOLUME":  {},
+		"$ATTRDEF": {},
+		"$BITMAP":  {},
+		"$BOOT":    {},
+		"$BADCLUS": {},
+		"$SECURE":  {},
+		"$UPCASE":  {},
+		"$EXTEND":  {},
+		"$QUOTA":   {},
+		"$OBJID":   {},
+		"$REPARSE": {},
 	}
 )
 
 // isValidFileName ensures a file is not using reserved names and meets system constraints
-func isValidFileName(name string) bool {
-	name = strings.ToUpper(strings.TrimSpace(name))
+func isValidFileName(filename string) (bool, error) {
+	original := filename
+	filename = strings.TrimSpace(filename)
+	filename = strings.ToUpper(filename);
 
-	if len(name) > maxLength || characterFilterRegex.MatchString(name) {
-		return false
+	if filename == "" {
+		return false, errors.New("filename cannot be empty")
 	}
 
-	if _, exists := dosReservedNames[name]; exists {
-		return false
+	if len(filename) > maxLength {
+		return false, errors.New("filename exceeds maximum length")
 	}
 
-	if _, exists := windowsReservedNames[name]; exists {
-		return false
+	if characterFilterRegex.MatchString(filename) {
+		return false, errors.New("filename contains invalid characters")
 	}
 
-	return true
+	baseName := filenameWithoutExtension(filename)
+
+	if _, exists := dosReservedNames[baseName]; exists {
+		return false, errors.New("filename is a reserved DOS name")
+	}
+
+	if _, exists := windowsReservedNames[baseName]; exists {
+		return false, errors.New("filename is a reserved windows name")
+	}
+
+	if hasTrailingDotOrSpace(original) {
+		return false, errors.New("filename has trailing dots or spaces")
+	}
+
+	return true, nil
+}
+
+func filenameWithoutExtension(filename string) string {
+	return strings.TrimSuffix(filename, filepath.Ext(filename))
+}
+
+func hasTrailingDotOrSpace(filename string) bool {
+	return regexp.MustCompile(`[.\s]+$`).MatchString(filename)
 }
 
 // collectFiles walks through the source directory and returns all file paths
@@ -107,7 +131,7 @@ func collectFiles(sourceDir string) ([]string, error) {
 
 			if !d.IsDir() {
 				baseName := filepath.Base(path)
-				if !isValidFileName(baseName) {
+				if ok, _ := isValidFileName(baseName); !ok {
 					return errors.New("invalid file name: " + baseName)
 				}
 
@@ -148,7 +172,7 @@ func collectFilesWithSize(sourceDir string) ([]fileInfo, error) {
 			}
 
 			// Validate filename before adding it
-			if !isValidFileName(filepath.Base(path)) {
+			if ok, _ := isValidFileName(filepath.Base(path)); !ok {
 				return errors.New("invalid file name: " + path)
 			}
 

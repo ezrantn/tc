@@ -3,6 +3,7 @@ package treecut
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -33,5 +34,35 @@ func TestCollectFiles(t *testing.T) {
 	expected := 3
 	if len(files) != expected {
 		t.Errorf("expected %d files, got %d", expected, len(files))
+	}
+}
+
+func TestCollectFilesBySize(t *testing.T) {
+
+}
+
+func TestIsValidName(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"Valid filename", "myfile.txt", true},
+		{"Empty string", "", false},
+		{"Exceeds max length", strings.Repeat("a", maxLength+1), false},
+		{"Contains invalid character", "file:name.txt", false},
+		{"DOS reserved name", "CON", false},
+		{"DOS reserved name case insensitive", "con", false},
+		{"Windows reserved name", "$MFT", false},
+		{"Windows reserved name case insensitive", "$mft", false},
+		{"Valid long filename", strings.Repeat("a", maxLength), true},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got, _ := isValidFileName(test.input); got != test.expected {
+				t.Errorf("isValidFileName(%q) = %v; want %v", test.input, got, test.expected)
+			}
+		})
 	}
 }
