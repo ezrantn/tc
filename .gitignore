@@ -7,7 +7,7 @@
 *.dll
 *.so
 *.dylib
-bin
+bin/
 
 # Test binary, built with `go test -c`
 *.test
@@ -23,4 +23,5 @@ go.work
 go.work.sum
 
 # env file
-.env
+.env# Added by goreleaser init:
+dist/
