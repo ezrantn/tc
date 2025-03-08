@@ -84,7 +84,7 @@ func TestCreateSymlinkTreeBySize(t *testing.T) {
 	if err := os.Mkdir(partition1, os.ModePerm); err != nil {
 		t.Fatalf("error creating directory: %v", err)
 	}
-	
+
 	if err := os.Mkdir(partition2, os.ModePerm); err != nil {
 		t.Fatalf("error creating directory: %v", err)
 	}
