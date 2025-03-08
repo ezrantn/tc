@@ -21,4 +21,11 @@ func main() {
 	if err := treecut.MakePartitions(config); err != nil {
 		slog.Error(err.Error())
 	}
+
+	// Unlink Example:
+	//
+	outputDirs := []string{"examples/partition1", "examples/partition2"}
+	if err := treecut.RemovePartitions(outputDirs); err != nil {
+		slog.Error(err.Error())
+	}
 }

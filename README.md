@@ -3,7 +3,7 @@
 > [!WARNING]
 > Work in progress. Expect bugs ahead!
 
-treecut is a Go library and CLI tool for splitting large file trees into smaller, more manageable subtrees using symbolic links. Whether you're organizing massive datasets, optimizing storage, or enabling parallel processing, treecut helps you partition files efficiently—without creating duplicates.
+treecut is a Go library and CLI tool for splitting large file trees into smaller, more manageable subtrees using symbolic links. Whether you're organizing massive datasets, optimizing storage, or enabling parallel processing, treecut helps you partition files efficiently without creating duplicates.
 
 It supports two partitioning methods:
 
@@ -44,7 +44,7 @@ go install github.com/ezrantn/treecut@latest
 
 ## Usage
 
-Using treecut as a library is simple:
+Using treecut as a library makes it easy to create partitions with symlinks:
 
 ```go
 // Here we are not partitioning by size, which means we are using the default value, partitioning by file count.
@@ -59,7 +59,16 @@ if err := treecut.MakePartitions(config); err != nil {
 }
 ```
 
-To use the CLI tool, run:
+To unlink partitions using the library, follow this approach:
+
+```go
+outputDirs := []string{"examples/partition1", "examples/partition2"}
+if err := treecut.RemovePartitions(outputDirs); err != nil {
+    slog.Error(err.Error())
+}
+```
+
+To use the CLI tool, run the following command to create partitions:
 
 ```bash
 ./bin/treecut --source=examples/data --output=examples/partition1,examples/partition2
@@ -68,11 +77,17 @@ To use the CLI tool, run:
 - `--source=<path>`: Specifies the source directory containing the files you want to partition.
 - `--output=<paths>`: Defines one or more output directories where symlinks to the partitioned files will be created. Multiple directories should be separated by commas (`,`).
 
-**Important Notes**
+### Important Notes
 
-- All flags are required—you must specify both --source and --output.
+- All flags are required. You must specify both `--source` and `--output`.
 - Multiple output directories allow for distributing files across partitions. The more output directories you provide, the more partitions treecut will create.
 - Files will not be copied, only symbolic links will be created in the output directories, saving disk space.
+
+To remove partitions, run the following command:
+
+```bash
+./bin/treecut --unlink --output=examples/partition1,examples/partition2
+```
 
 ## Why Treecut?
 
@@ -113,7 +128,15 @@ With treecut, the same task is effortless:
 
 - Automatically partitions files by count or size.
 - Works recursively on nested directories.
-- No scripting required—just run a single command.
+- No scripting required, just run a single command.
 - Cross-platform support: Unlike `ln`, which is not available on Windows, treecut works on Windows, macOS, and Linux.
 
 Since treecut wraps around the same core idea as `ln` but adds automation, cross-platform support, and partitioning logic, it serves as a better alternative when dealing with large file trees.
+
+## License
+
+This tool is open-source and available under the [MIT License](https://github.com/ezrantn/treecut/blob/main/LICENSE).
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a pull request. For major changes, please open an issue first to discuss what you would like to change.

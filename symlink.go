@@ -1,6 +1,7 @@
 package treecut
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 )
@@ -50,6 +51,28 @@ func createSymlinkTreeSize(files [][]fileInfo, outputDirs []string) error {
 			if err := os.Symlink(file.path, linkPath); err != nil {
 				return err
 			}
+		}
+	}
+
+	return nil
+}
+
+func removeSymlinkTree(outputDirs []string) error {
+	for _, dir := range outputDirs {
+		err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			// Check if the file is a symlink
+			if info.Mode()&os.ModeSymlink != 0 {
+				return os.Remove(path)
+			}
+
+			return nil
+		})
+		if err != nil {
+			return err
 		}
 	}
 

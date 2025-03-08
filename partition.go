@@ -2,6 +2,7 @@ package treecut
 
 import (
 	"errors"
+	"os"
 	"sort"
 )
 
@@ -9,24 +10,6 @@ type PartitionConfig struct {
 	SourceDir  string   // Original directory
 	OutputDirs []string // Partition directories
 	BySize     bool     // Set to true to activate partition by size (largest -> smallest)
-}
-
-// partitionFiles splits a list of file paths into `partitions` equal groups
-func partitionFiles(files []string, partitions int) [][]string {
-	// Preallocate slices with estimated capacity
-	result := make([][]string, partitions)
-	avgSize := (len(files) + partitions - 1) / partitions // Ceiling division
-
-	for i := range result {
-		result[i] = make([]string, 0, avgSize) // Preallocate capacity
-	}
-
-	// Distribute files into partitions
-	for i, file := range files {
-		result[i%partitions] = append(result[i%partitions], file)
-	}
-
-	return result
 }
 
 func MakePartitions(config PartitionConfig) error {
@@ -52,6 +35,40 @@ func MakePartitions(config PartitionConfig) error {
 		partitions := partitionFiles(files, len(config.OutputDirs))
 		return createSymlinkTree(partitions, config.OutputDirs)
 	}
+}
+
+func RemovePartitions(outputDirs []string) error {
+	// Remove the symlink first
+	if err := removeSymlinkTree(outputDirs); err != nil {
+		return err
+	}
+
+	// Remove the partition directories
+	for _, dir := range outputDirs {
+		if err := os.RemoveAll(dir); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// partitionFiles splits a list of file paths into `partitions` equal groups
+func partitionFiles(files []string, partitions int) [][]string {
+	// Preallocate slices with estimated capacity
+	result := make([][]string, partitions)
+	avgSize := (len(files) + partitions - 1) / partitions // Ceiling division
+
+	for i := range result {
+		result[i] = make([]string, 0, avgSize) // Preallocate capacity
+	}
+
+	// Distribute files into partitions
+	for i, file := range files {
+		result[i%partitions] = append(result[i%partitions], file)
+	}
+
+	return result
 }
 
 func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
