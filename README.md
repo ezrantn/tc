@@ -1,5 +1,8 @@
 # treecut 🌲
 
+> [!WARNING]
+> Work in progress. Expect bugs ahead!
+
 treecut is a Go library and CLI tool for splitting large file trees into smaller, more manageable subtrees using symbolic links. Whether you're organizing massive datasets, optimizing storage, or enabling parallel processing, treecut helps you partition files efficiently—without creating duplicates.
 
 It supports two partitioning methods:
