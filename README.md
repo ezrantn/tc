@@ -33,3 +33,31 @@ By using symlinks, treecut ensures that no file duplication occurs, saving disk 
 ```bash
 go get github.com/ezrantn/treecut
 ```
+
+### CLI
+
+```bash
+go install github.com/ezrantn/treecut
+```
+
+## Usage
+
+Simple To Use:
+
+```go
+config := treecut.PartitionConfig{
+    SourceDir:  "examples/data",
+    OutputDirs: []string{"examples/partition1", "examples/partition2"},
+    BySize:     false,
+}
+
+if err := treecut.MakePartitions(config); err != nil {
+    slog.Error(err.Error())
+}
+```
+
+How to use this CLI tool:
+
+```bash
+./bin/treecut --source=examples/data --output=examples/partition1,examples/partition2
+```

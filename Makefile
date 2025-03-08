@@ -1,10 +1,11 @@
 BINARY_NAME=treecut
 PKG=.
 OUTPUT_DIR=bin
+EXECUTABLE_FILE=cmd/main.go
 
 GO=go
 GOTEST=$(GO) test -v
-GOBUILD=$(GO) build -o $(OUTPUT_DIR)/$(BINARY_NAME)
+GOBUILD=$(GO) build -o $(OUTPUT_DIR)/$(BINARY_NAME) $(EXECUTABLE_FILE)
 GOLINT=golangci-lint run
 GOTIDY=$(GO) mod tidy
 GOCOVOPENHTML=$(GO) tool cover -html=coverage.out
