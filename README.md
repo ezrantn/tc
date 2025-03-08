@@ -30,24 +30,31 @@ By using symlinks instead of copying files, treecut prevents duplication and sav
 
 ## Installation
 
-### Go Library
+### Library
+
+To add treecut to your Go project, follow these steps:
 
 ```bash
 go get github.com/ezrantn/treecut
 ```
 
-### CLI
+### CLI 
+
+Via Go install (recommended):
 
 ```bash
 go install github.com/ezrantn/treecut@latest
 ```
+
+Via Homebrew (coming soon!)
 
 ## Usage
 
 Using treecut as a library makes it easy to create partitions with symlinks:
 
 ```go
-// Here we are not partitioning by size, which means we are using the default value, partitioning by file count.
+// Here we are not partitioning by size, 
+// which means we are using the default value, partitioning by file count.
 config := treecut.PartitionConfig{
     SourceDir:  "examples/data",
     OutputDirs: []string{"examples/partition1", "examples/partition2"},
