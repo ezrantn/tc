@@ -21,10 +21,9 @@ func createTestFile(t *testing.T, dir, name string) string {
 
 func TestCreateSymlinkTree(t *testing.T) {
 	tempDir := t.TempDir()
-	var err error
 
 	originalDir := filepath.Join(tempDir, "original")
-	if err = os.Mkdir(originalDir, os.ModePerm); err != nil {
+	if err := os.Mkdir(originalDir, os.ModePerm); err != nil {
 		t.Fatalf("error creating directory: %v", err)
 	}
 
@@ -33,11 +32,11 @@ func TestCreateSymlinkTree(t *testing.T) {
 	// Create partitions
 	partition1 := filepath.Join(tempDir, "partition1")
 	partition2 := filepath.Join(tempDir, "partition2")
-	if err = os.Mkdir(partition1, os.ModePerm); err != nil {
+	if err := os.Mkdir(partition1, os.ModePerm); err != nil {
 		t.Fatalf("error creating directory: %v", err)
 	}
 
-	if err = os.Mkdir(partition2, os.ModePerm); err != nil {
+	if err := os.Mkdir(partition2, os.ModePerm); err != nil {
 		t.Fatalf("error creating directory: %v", err)
 	}
 
@@ -49,7 +48,7 @@ func TestCreateSymlinkTree(t *testing.T) {
 
 	// Create symlinks
 	outputDirs := []string{partition1, partition2}
-	err = createSymlinkTree(partitions, outputDirs)
+	err := createSymlinkTree(partitions, outputDirs)
 	if err != nil {
 		t.Fatalf("create symlink tree failed: %v", err)
 	}
@@ -97,7 +96,7 @@ func TestCreateSymlinkTreeBySize(t *testing.T) {
 
 	// Create symlinks
 	outputDirs := []string{partition1, partition2}
-	err := createSymlinkTreeSize(partitions, outputDirs)
+	err := createSymlinkTreeBySize(partitions, outputDirs)
 	if err != nil {
 		t.Fatalf("createSymlinkTreeSize failed: %v", err)
 	}
@@ -113,5 +112,43 @@ func TestCreateSymlinkTreeBySize(t *testing.T) {
 				t.Errorf("expected symlink, but found regular file: %s", linkPath)
 			}
 		}
+	}
+}
+
+func TestRemoveSymlinkTree(t *testing.T) {
+	tempDir := t.TempDir()
+
+	// Create an original file inside a subdirectory
+	originalDir := filepath.Join(tempDir, "original")
+	if err := os.Mkdir(originalDir, os.ModePerm); err != nil {
+		t.Fatalf("failed to create directory %s: %v", originalDir, err)
+	}
+
+	testFile := createTestFile(t, originalDir, "testfile.txt")
+
+	// Create a symlink to the test file
+	symlinkPath := filepath.Join(tempDir, "symlink")
+	if err := os.Symlink(testFile, symlinkPath); err != nil {
+		t.Fatalf("failed to create symlink %s -> %s: %v", symlinkPath, testFile, err)
+	}
+
+	// Ensure the symlink exists before calling removeSymlinkTree
+	if _, err := os.Lstat(symlinkPath); err != nil {
+		t.Fatalf("symlink should exist before removal: %v", err)
+	}
+
+	// Call removeSymlinkTree
+	if err := removeSymlinkTree([]string{tempDir}); err != nil {
+		t.Fatalf("removeSymlinkTree failed: %v", err)
+	}
+
+	// Verify that the symlink has been removed
+	if _, err := os.Lstat(symlinkPath); !os.IsNotExist(err) {
+		t.Errorf("expected symlink %s to be removed, but it still exists", symlinkPath)
+	}
+
+	// Verify that the original file still exists
+	if _, err := os.Stat(testFile); err != nil {
+		t.Errorf("expected original file %s to exist, but got error: %v", testFile, err)
 	}
 }

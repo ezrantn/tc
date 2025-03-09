@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log/slog"
+	"log"
 
 	"github.com/ezrantn/treecut"
 )
@@ -12,6 +12,8 @@ import (
 // Here we are not partitioning by size, which means we are using the default value,
 // partitioning by file count.
 func main() {
+	// Create partition example:
+	//
 	config := treecut.PartitionConfig{
 		SourceDir:  "examples/data",
 		OutputDirs: []string{"examples/partition1", "examples/partition2"},
@@ -19,13 +21,14 @@ func main() {
 	}
 
 	if err := treecut.MakePartitions(config); err != nil {
-		slog.Error(err.Error())
+		log.Fatal(err)
 	}
 
-	// Unlink Example:
+	// Unlink example:
 	//
 	outputDirs := []string{"examples/partition1", "examples/partition2"}
+	// outputDirsFalse := []string{"examples/false_dir"}
 	if err := treecut.RemovePartitions(outputDirs); err != nil {
-		slog.Error(err.Error())
+		log.Fatal(err)
 	}
 }

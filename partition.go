@@ -2,6 +2,7 @@ package treecut
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"sort"
 )
@@ -21,32 +22,38 @@ func MakePartitions(config PartitionConfig) error {
 	if config.BySize {
 		files, err := collectFilesWithSize(config.SourceDir)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to collect files with size from %s: %w", config.SourceDir, err)
 		}
 
 		partitions := partitionFilesBySize(files, len(config.OutputDirs))
-		return createSymlinkTreeSize(partitions, config.OutputDirs)
+		if err := createSymlinkTreeBySize(partitions, config.OutputDirs); err != nil {
+			return fmt.Errorf("failed to create symlink tree by size: %w", err)
+		}
 	} else {
 		files, err := collectFiles(config.SourceDir)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to collect files from %s: %w", config.SourceDir, err)
 		}
 
 		partitions := partitionFiles(files, len(config.OutputDirs))
-		return createSymlinkTree(partitions, config.OutputDirs)
+		if err := createSymlinkTree(partitions, config.OutputDirs); err != nil {
+			return fmt.Errorf("failed to create symlink tree: %w", err)
+		}
 	}
+
+	return nil
 }
 
 func RemovePartitions(outputDirs []string) error {
 	// Remove the symlink first
 	if err := removeSymlinkTree(outputDirs); err != nil {
-		return err
+		return fmt.Errorf("failed to remove symlink tree: %w", err)
 	}
 
 	// Remove the partition directories
 	for _, dir := range outputDirs {
 		if err := os.RemoveAll(dir); err != nil {
-			return err
+			return fmt.Errorf("failed to remove partition directory %s: %w", dir, err)
 		}
 	}
 
@@ -55,6 +62,10 @@ func RemovePartitions(outputDirs []string) error {
 
 // partitionFiles splits a list of file paths into `partitions` equal groups
 func partitionFiles(files []string, partitions int) [][]string {
+	if partitions <= 0 {
+		return nil
+	}
+
 	// Preallocate slices with estimated capacity
 	result := make([][]string, partitions)
 	avgSize := (len(files) + partitions - 1) / partitions // Ceiling division
@@ -72,14 +83,18 @@ func partitionFiles(files []string, partitions int) [][]string {
 }
 
 func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
+	if partitions <= 0 {
+		return nil
+	}
+
 	// Sort files by size (largest first)
 	sort.Slice(files, func(i, j int) bool {
 		return files[i].size > files[j].size
 	})
 
-	// Create partitions buckets
+	// Create partition buckets
 	result := make([][]fileInfo, partitions)
-	sizes := make([]int64, partitions) // Track partitions sizes
+	sizes := make([]int64, partitions) // Track partition sizes
 
 	for _, file := range files {
 		// Find the partition with the smallest current size

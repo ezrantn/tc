@@ -9,7 +9,7 @@ GOBUILD=$(GO) build -o $(OUTPUT_DIR)/$(BINARY_NAME) $(EXECUTABLE_FILE)
 GOLINT=golangci-lint run
 GOTIDY=$(GO) mod tidy
 GOCOVOPENHTML=$(GO) tool cover -html=coverage.out
-GOCOV=$(GO) test . -coverprofile=covmake erage.out
+GOCOV=$(GO) test . -coverprofile=coverage.out
 GOBENCH=$(GO) test -bench=. -benchtime=10s ./benches
 
 default: build
@@ -50,8 +50,12 @@ open-html:
 	$(GOCOVOPENHTML)
 
 .PHONY: cov
-cov: open-html
-	@echo "Test coverage..."
+cov: coverage open-html
+	@echo "Test coverage generated and opened."
+
+.PHONY: coverage
+coverage:
+	@echo "Generating coverage report..."
 	$(GOCOV)
 
 .PHONY: bench
