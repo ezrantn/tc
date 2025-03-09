@@ -41,6 +41,7 @@ func createSymlinkTree(files [][]string, outputDirs []string) error {
 
 func createSymlinkTreeBySize(files [][]fileInfo, outputDirs []string) error {
 	for i, partition := range files {
+
 		for _, file := range partition {
 			linkPath := filepath.Join(outputDirs[i], filepath.Base(file.path))
 
@@ -58,7 +59,7 @@ func createSymlinkTreeBySize(files [][]fileInfo, outputDirs []string) error {
 				return fmt.Errorf("failed to create directory %s: %w", filepath.Dir(linkPath), err)
 			}
 
-			// Create a symlink
+			// Create the symlink
 			if err := os.Symlink(file.path, linkPath); err != nil {
 				return fmt.Errorf("failed to create symlink from %s to %s: %w", file.path, linkPath, err)
 			}
@@ -83,10 +84,10 @@ func removeSymlinkTree(outputDirs []string) error {
 			}
 			return nil
 		})
+
 		if err != nil {
 			return fmt.Errorf("failed to remove symlinks in directory %s: %w", dir, err)
 		}
 	}
-
 	return nil
 }

@@ -104,6 +104,7 @@ func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
 				minIndex = i
 			}
 		}
+
 		// Assign file to the partition
 		result[minIndex] = append(result[minIndex], file)
 		sizes[minIndex] += file.size

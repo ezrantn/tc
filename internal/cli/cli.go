@@ -10,6 +10,12 @@ import (
 	"github.com/ezrantn/treecut"
 )
 
+var (
+	reset = "\033[0m"
+	red   = "\033[31m"
+)
+
+// ParseCLI parses command-line arguments and returns a PartitionConfig.
 func ParseCLI() (treecut.PartitionConfig, bool, error) {
 	sourceDir := flag.String("source", "", "Source directory to partition")
 	outputDirs := flag.String("output", "", "Comma-separated list of output directories")
@@ -18,29 +24,32 @@ func ParseCLI() (treecut.PartitionConfig, bool, error) {
 
 	flag.Parse()
 
-	// If the unlink is set, no need to check sourceDir
+	// Unlink mode (removing partitions)
 	if *unlink {
 		if *outputDirs == "" {
-			fmt.Println("Usage: treecut --source=<source-dir> --output=<output-dir1,output-dir2> [--by-size]")
-			os.Exit(1)
+			return treecut.PartitionConfig{}, false, errors.New("missing required --output flag for unlink mode")
 		}
 
 		outputDirsList, err := splitOutputDirs(*outputDirs)
 		if err != nil {
-			return treecut.PartitionConfig{}, false, errors.New("cannot split output directories")
+			return treecut.PartitionConfig{}, false, fmt.Errorf("invalid output directories: %w", err)
 		}
 
 		return treecut.PartitionConfig{OutputDirs: outputDirsList}, true, nil
 	}
 
-	if *sourceDir == "" || *outputDirs == "" {
-		fmt.Println("Usage: treecut --source=<source-dir> --output=<output-dir1,output-dir2> [--by-size]")
-		os.Exit(1)
+	// Regular partitioning mode
+	if *sourceDir == "" {
+		return treecut.PartitionConfig{}, false, errors.New("missing required --source flag")
+	}
+	
+	if *outputDirs == "" {
+		return treecut.PartitionConfig{}, false, errors.New("missing required --output flag")
 	}
 
 	outputDirsList, err := splitOutputDirs(*outputDirs)
 	if err != nil {
-		return treecut.PartitionConfig{}, false, errors.New("cannot split directory output")
+		return treecut.PartitionConfig{}, false, fmt.Errorf("invalid output directories: %w", err)
 	}
 
 	return treecut.PartitionConfig{
@@ -50,10 +59,15 @@ func ParseCLI() (treecut.PartitionConfig, bool, error) {
 	}, false, nil
 }
 
+// splitOutputDirs splits output directories from a comma-separated string.
 func splitOutputDirs(output string) ([]string, error) {
-	if output == "" {
-		return nil, errors.New("output directories not found")
+	if strings.TrimSpace(output) == "" {
+		return nil, errors.New("output directories cannot be empty")
 	}
-
 	return strings.Split(output, ","), nil
+}
+
+// printError prints an error in red color
+func PrintError(err error) {
+	fmt.Fprintf(os.Stderr, "%sERROR:%s %v\n", red, reset, err)
 }

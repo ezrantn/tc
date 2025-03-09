@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/ezrantn/treecut"
@@ -12,7 +11,8 @@ import (
 func main() {
 	config, unlink, err := cli.ParseCLI()
 	if err != nil {
-		log.Fatalf("cannot parse cli: %v", err)
+		cli.PrintError(err)
+		os.Exit(1)
 	}
 
 	if unlink {

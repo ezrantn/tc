@@ -77,7 +77,7 @@ var (
 func isValidFileName(filename string) (bool, error) {
 	original := filename
 	filename = strings.TrimSpace(filename)
-	filename = strings.ToUpper(filename);
+	filename = strings.ToUpper(filename)
 
 	if filename == "" {
 		return false, errors.New("filename cannot be empty")
