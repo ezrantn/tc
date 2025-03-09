@@ -120,7 +120,6 @@ func hasTrailingDotOrSpace(filename string) bool {
 func collectFiles(sourceDir string) ([]string, error) {
 	filesChan := make(chan string, 100) // Buffered channel to reduce contention
 	errChan := make(chan error, 1)
-
 	// Walk the directory in a separate goroutine
 	go func() {
 		defer close(filesChan)
