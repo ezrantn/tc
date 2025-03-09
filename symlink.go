@@ -8,12 +8,11 @@ import (
 	"path/filepath"
 )
 
-// CreateSymlinkTree creates symlinks in partition directories
-func createSymlinkTree(files [][]string, outputDirs []string) error {
+func createSymlinks[T any](files [][]T, outputDirs []string, getPath func(T) string) error {
 	for i, partition := range files {
 		for _, file := range partition {
-			// Symlink path inside partition
-			linkPath := filepath.Join(outputDirs[i], filepath.Base(file))
+			filePath := getPath(file)
+			linkPath := filepath.Join(outputDirs[i], filepath.Base(filePath))
 
 			// Remove existing symlink or file before creating a new one
 			if _, err := os.Lstat(linkPath); err == nil {
@@ -30,43 +29,25 @@ func createSymlinkTree(files [][]string, outputDirs []string) error {
 			}
 
 			// Create a symlink
-			if err := os.Symlink(file, linkPath); err != nil {
-				return fmt.Errorf("failed to create symlink from %s to %s: %w", file, linkPath, err)
+			if err := os.Symlink(filePath, linkPath); err != nil {
+				return fmt.Errorf("failed to create symlink from %s to %s: %w", filePath, linkPath, err)
 			}
 		}
 	}
-
 	return nil
 }
 
+// CreateSymlinkTree creates symlinks in partition directories
+func createSymlinkTree(files [][]string, outputDirs []string) error {
+	return createSymlinks(files, outputDirs, func(f string) string {
+		return f
+	})
+}
+
 func createSymlinkTreeBySize(files [][]fileInfo, outputDirs []string) error {
-	for i, partition := range files {
-
-		for _, file := range partition {
-			linkPath := filepath.Join(outputDirs[i], filepath.Base(file.path))
-
-			// Check if the symlink already exists and remove it
-			if _, err := os.Lstat(linkPath); err == nil {
-				if err := os.Remove(linkPath); err != nil {
-					return fmt.Errorf("failed to remove existing symlink %s: %w", linkPath, err)
-				}
-			} else if !errors.Is(err, os.ErrNotExist) {
-				return fmt.Errorf("failed to check symlink existence %s: %w", linkPath, err)
-			}
-
-			// Ensure the partition directory exists
-			if err := os.MkdirAll(filepath.Dir(linkPath), os.ModePerm); err != nil {
-				return fmt.Errorf("failed to create directory %s: %w", filepath.Dir(linkPath), err)
-			}
-
-			// Create the symlink
-			if err := os.Symlink(file.path, linkPath); err != nil {
-				return fmt.Errorf("failed to create symlink from %s to %s: %w", file.path, linkPath, err)
-			}
-		}
-	}
-
-	return nil
+	return createSymlinks(files, outputDirs, func(f fileInfo) string {
+		return f.path
+	})
 }
 
 func removeSymlinkTree(outputDirs []string) error {
