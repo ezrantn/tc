@@ -1,4 +1,12 @@
-# tc
+<h1 align="center">tc</h1>
+
+<p align="center"><i>split your large trees to smaller trees with fast symlinks</i></p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/actions/workflow/status/ezrantn/tc/go.yml" alt="GitHub Actions Workflow Status">
+  <img src="https://img.shields.io/github/license/ezrantn/tc" alt="GitHub License">
+  <img src="https://img.shields.io/github/go-mod/go-version/ezrantn/tc" alt="GitHub go.mod Go version">
+</p>
 
 > [!WARNING]
 > Work in progress. Expect bugs ahead!
