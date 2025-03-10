@@ -1,6 +1,6 @@
 package benches
 
-// This file consists of benchmarks for the `tc` program.
+// This file consists of benchmarks for the `trc` program.
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ezrantn/tc"
+	"github.com/ezrantn/trc"
 )
 
 func createTestFiles(t *testing.T, dir string, filenames []string) {
@@ -55,7 +55,7 @@ func BenchmarkMakePartitions(b *testing.B) {
 		}
 	}
 
-	config := tc.PartitionConfig{
+	config := trc.PartitionConfig{
 		SourceDir:  originalDir,
 		OutputDirs: outputDirs,
 		BySize:     false,
@@ -64,7 +64,7 @@ func BenchmarkMakePartitions(b *testing.B) {
 	b.StartTimer() // Start timing after setup
 
 	for i := 0; i < b.N; i++ {
-		if err := tc.MakePartitions(config); err != nil {
+		if err := trc.MakePartitions(config); err != nil {
 			b.Errorf("cannot create partition, something is wrong: %v", err)
 		}
 	}

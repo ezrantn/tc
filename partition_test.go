@@ -1,4 +1,4 @@
-package tc
+package trc
 
 import (
 	"os"
@@ -23,7 +23,7 @@ func TestPartitionFiles(t *testing.T) {
 	}
 
 	if totalFiles != len(files) {
-		t.Errorf("mismatch in total files: expected %d, got %d", len(files), totalFiles)
+		t.Errorf("mismatrch in total files: expected %d, got %d", len(files), totalFiles)
 	}
 }
 

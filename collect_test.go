@@ -1,4 +1,4 @@
-package tc
+package trc
 
 import (
 	"os"
@@ -208,7 +208,7 @@ func TestCollectFilesBySize(t *testing.T) {
 						t.Fatalf("Failed to create test file %s: %v", file, err)
 					}
 
-					// Write dummy data to match the expected file size
+					// Write dummy data to matrch the expected file size
 					if _, err := f.Write(make([]byte, tt.size)); err != nil {
 						t.Fatalf("Failed to write to file %s: %v", file, err)
 					}

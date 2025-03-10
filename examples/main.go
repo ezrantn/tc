@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/ezrantn/tc"
+	"github.com/ezrantn/trc"
 )
 
 // This is a code example of how to use this library. In the `examples` directory, I created a `data` folder
@@ -14,13 +14,13 @@ import (
 func main() {
 	// Create partition example:
 	//
-	config := tc.PartitionConfig{
+	config := trc.PartitionConfig{
 		SourceDir:  "examples/data",
 		OutputDirs: []string{"examples/partition1", "examples/partition2"},
 		BySize:     false,
 	}
 
-	if err := tc.MakePartitions(config); err != nil {
+	if err := trc.MakePartitions(config); err != nil {
 		log.Fatal(err)
 	}
 
@@ -28,7 +28,7 @@ func main() {
 	//
 	outputDirs := []string{"examples/partition1", "examples/partition2"}
 	// outputDirsFalse := []string{"examples/false_dir"}
-	if err := tc.RemovePartitions(outputDirs); err != nil {
+	if err := trc.RemovePartitions(outputDirs); err != nil {
 		log.Fatal(err)
 	}
 }

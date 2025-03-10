@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ezrantn/tc"
-	"github.com/ezrantn/tc/internal/cli"
+	"github.com/ezrantn/trc"
+	"github.com/ezrantn/trc/internal/cli"
 )
 
 func main() {
@@ -17,7 +17,7 @@ func main() {
 
 	if unlink {
 		fmt.Println("Removing partitions and symlinks...")
-		if err := tc.RemovePartitions(config.OutputDirs); err != nil {
+		if err := trc.RemovePartitions(config.OutputDirs); err != nil {
 			fmt.Println("Error removing partitions:", err)
 			os.Exit(1)
 		}
@@ -25,7 +25,7 @@ func main() {
 		fmt.Println("Partitions removed sucessfully")
 	} else {
 		fmt.Println("Creating partitions...")
-		if err := tc.MakePartitions(config); err != nil {
+		if err := trc.MakePartitions(config); err != nil {
 			fmt.Println("Error creating partitions:", err)
 			os.Exit(1)
 		}

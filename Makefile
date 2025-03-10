@@ -1,4 +1,4 @@
-BINARY_NAME=tc
+BINARY_NAME=trc
 PKG=.
 OUTPUT_DIR=bin
 EXECUTABLE_FILE=cmd/main.go
