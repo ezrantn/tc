@@ -50,6 +50,24 @@ func createSymlinkTreeBySize(files [][]fileInfo, outputDirs []string) error {
 	})
 }
 
+func createSymlinkWithMimeType(mimeMap map[string][]string, destDir string) error {
+	for category, files := range mimeMap {
+		categoryFolder := filepath.Join(destDir, category)
+		if err := os.MkdirAll(categoryFolder, os.ModePerm); err != nil {
+			return err
+		}
+
+		for _, file := range files {
+			linkPath := filepath.Join(categoryFolder, filepath.Base(file))
+			if err := os.Symlink(file, linkPath); err != nil {
+				fmt.Printf("Failed to create symlink for %s: %v\n", file, err)
+			}
+		}
+	}
+
+	return nil
+}
+
 func removeSymlinkTree(outputDirs []string) error {
 	for _, dir := range outputDirs {
 		err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {

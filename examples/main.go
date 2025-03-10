@@ -17,7 +17,7 @@ func main() {
 	config := trc.PartitionConfig{
 		SourceDir:  "examples/data",
 		OutputDirs: []string{"examples/partition1", "examples/partition2"},
-		BySize:     false,
+		ByType:     true,
 	}
 
 	if err := trc.MakePartitions(config); err != nil {
@@ -26,9 +26,9 @@ func main() {
 
 	// Unlink example:
 	//
-	outputDirs := []string{"examples/partition1", "examples/partition2"}
-	// outputDirsFalse := []string{"examples/false_dir"}
-	if err := trc.RemovePartitions(outputDirs); err != nil {
-		log.Fatal(err)
-	}
+	// outputDirs := []string{"examples/partition1", "examples/partition2"}
+	// // outputDirsFalse := []string{"examples/false_dir"}
+	// if err := trc.RemovePartitions(outputDirs); err != nil {
+	// 	log.Fatal(err)
+	// }
 }

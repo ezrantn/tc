@@ -11,8 +11,6 @@ import (
 )
 
 var (
-	reset     = "\033[0m"
-	red       = "\033[31m"
 	version   = "v0.0.1"
 	asciiText = `
 ╱╭╮╱╱╱╱╱╱╱╱╱╱╱╱╱╱╭╮
@@ -42,6 +40,9 @@ func ParseCLI() (trc.PartitionConfig, bool, error) {
 
 	bySize := flag.Bool("by-size", false, "Partition files by size")
 	flag.BoolVar(bySize, "b", false, "Shorthand for --by-size")
+
+	byType := flag.Bool("by-type", false, "Partition by type")
+	flag.BoolVar(byType, "t", false, "Shorthand for --by-type")
 
 	unlink := flag.Bool("unlink", false, "Unlink symlinks and remove the partition directories")
 	flag.BoolVar(unlink, "u", false, "Shorthand for --unlink")
@@ -85,12 +86,13 @@ func ParseCLI() (trc.PartitionConfig, bool, error) {
 		SourceDir:  *sourceDir,
 		OutputDirs: outputDirsList,
 		BySize:     *bySize,
+		ByType:     *byType,
 	}, false, nil
 }
 
 // printError prints an error in red color
 func PrintError(err error) {
-	fmt.Fprintf(os.Stderr, "%sERROR:%s %v\n", red, reset, err)
+	fmt.Fprintf(os.Stderr, "%sERROR:%s %v\n", trc.Red, trc.Reset, err)
 }
 
 // splitOutputDirs splits output directories from a comma-separated string.
@@ -129,6 +131,7 @@ func printHelp() {
 	fmt.Println("  -s, --source <dir>   Source directory to partition")
 	fmt.Println("  -o, --output <dirs>  Comma-separated list of output directories")
 	fmt.Println("  -b, --by-size        Partition files by size instead of default method")
+	fmt.Println("  -t, --by-type        Partition files by MIME type")
 	fmt.Println("  -u, --unlink         Remove symlinks and partition directories")
 	fmt.Println("  -v, --version        Print trc (treecut) version")
 	fmt.Println()

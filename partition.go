@@ -11,11 +11,20 @@ type PartitionConfig struct {
 	SourceDir  string   // Original directory
 	OutputDirs []string // Partition directories
 	BySize     bool     // Set to true to activate partition by size (largest -> smallest)
+	ByType     bool     // Partition by MIME type
 }
 
 func MakePartitions(config PartitionConfig) error {
 	if len(config.OutputDirs) == 0 {
 		return errors.New("at least one output directory is required")
+	}
+
+	if config.ByType {
+		if err := partitionByType(config.SourceDir, config.OutputDirs[0]); err != nil {
+			return fmt.Errorf("failed to partition by type: %w", err)
+		}
+
+		return nil
 	}
 
 	// Collect files
@@ -111,4 +120,18 @@ func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
 	}
 
 	return result
+}
+
+func partitionByType(sourceDir, destDir string) error {
+	mimeMap, err := collectFilesWithMimeType(sourceDir)
+	if err != nil {
+		return err
+	}
+
+	err = createSymlinkWithMimeType(mimeMap, destDir)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

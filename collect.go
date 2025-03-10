@@ -2,10 +2,14 @@ package trc
 
 import (
 	"errors"
+	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/gabriel-vasile/mimetype"
 )
 
 type fileInfo struct {
@@ -182,4 +186,47 @@ func collectFilesWithSize(sourceDir string) ([]fileInfo, error) {
 	})
 
 	return files, err
+}
+
+func collectFilesWithMimeType(sourceDir string) (map[string][]string, error) {
+	// Map to store MIME type partitions
+	mimeMap := make(map[string][]string)
+
+	// Walk through the source directory
+	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Skip empty files
+		if info.Size() == 0 {
+			fmt.Printf("%sSkipping empty file: %s%s\n", Yellow, path, Reset)
+			return nil
+		}
+
+		// Detect MIME type
+		mtype, err := mimetype.DetectFile(path)
+		if err != nil {
+			fmt.Printf("Failed to detect MIME for %s: %v\n", path, err)
+			return nil
+		}
+
+		// Extract main type (e.g., "image", "video", "text")
+		mainType := mtype.String()
+		category := mainType[:strings.Index(mainType, "/")] // Extract category
+		mimeMap[category] = append(mimeMap[category], path)
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return mimeMap, nil
 }
