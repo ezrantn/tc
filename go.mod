@@ -1,3 +1,3 @@
-module github.com/ezrantn/treecut
+module github.com/ezrantn/tc
 
 go 1.24.0
