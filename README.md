@@ -1,20 +1,20 @@
-# treecut 🌲
+# tc
 
 > [!WARNING]
 > Work in progress. Expect bugs ahead!
 
-treecut is a Go library and CLI tool for splitting large file trees into smaller, more manageable subtrees using symbolic links. Whether you're organizing massive datasets, optimizing storage, or enabling parallel processing, treecut helps you partition files efficiently without creating duplicates.
+tc (or treecut) is a Go library and CLI tool for splitting large file trees into smaller, more manageable subtrees using symbolic links. Whether you're organizing massive datasets, optimizing storage, or enabling parallel processing, tc helps you partition files efficiently without creating duplicates.
 
 It supports two partitioning methods:
 
 - By file count → Each partition contains approximately the same number of files.
 - By file size → Each partition holds a roughly equal total file size.
 
-If you’ve ever struggled with thousands (or millions) of files cluttering a single directory, you know how frustrating it can be. Large directories can slow down file operations, complicate backups, and overwhelm your storage system. treecut provides a simple way to reorganize and distribute files efficiently.
+If you’ve ever struggled with thousands (or millions) of files cluttering a single directory, you know how frustrating it can be. Large directories can slow down file operations, complicate backups, and overwhelm your storage system. tc provides a simple way to reorganize and distribute files efficiently.
 
 Partitioning a file tree can improve load balancing by spreading files across multiple storage devices, enable parallel processing by allowing batch jobs to run on subsets of files, and make dataset management easier by breaking large datasets into smaller chunks. It’s also useful for organizing files before migration, ensuring backups and transfers are faster and more reliable.
 
-By using symlinks instead of copying files, treecut prevents duplication and saves disk space while maintaining full access to your original files.
+By using symlinks instead of copying files, tc prevents duplication and saves disk space while maintaining full access to your original files.
 
 > [!NOTE]
 > If you're not sure what a symbolic link is, read [this article](https://en.wikipedia.org/wiki/Symbolic_link) on Wikipedia.
@@ -32,36 +32,36 @@ By using symlinks instead of copying files, treecut prevents duplication and sav
 
 ### Library
 
-To add treecut to your Go project, follow these steps:
+To add tc to your Go project, follow these steps:
 
 ```bash
-go get github.com/ezrantn/treecut
+go get github.com/ezrantn/tc
 ```
 
-### CLI 
+### CLI
 
 Via Go install (recommended):
 
 ```bash
-go install github.com/ezrantn/treecut@latest
+go install github.com/ezrantn/tc@latest
 ```
 
 Via Homebrew (coming soon!)
 
 ## Usage
 
-Using treecut as a library makes it easy to create partitions with symlinks:
+Using tc as a library makes it easy to create partitions with symlinks:
 
 ```go
 // Here we are not partitioning by size, 
 // which means we are using the default value, partitioning by file count.
-config := treecut.PartitionConfig{
+config := tc.PartitionConfig{
     SourceDir:  "examples/data",
     OutputDirs: []string{"examples/partition1", "examples/partition2"},
     BySize:     false,
 }
 
-if err := treecut.MakePartitions(config); err != nil {
+if err := tc.MakePartitions(config); err != nil {
     slog.Error(err.Error())
 }
 ```
@@ -70,7 +70,7 @@ To unlink partitions using the library, follow this approach:
 
 ```go
 outputDirs := []string{"examples/partition1", "examples/partition2"}
-if err := treecut.RemovePartitions(outputDirs); err != nil {
+if err := tc.RemovePartitions(outputDirs); err != nil {
     slog.Error(err.Error())
 }
 ```
@@ -78,7 +78,7 @@ if err := treecut.RemovePartitions(outputDirs); err != nil {
 To use the CLI tool, run the following command to create partitions:
 
 ```bash
-./bin/treecut --source=examples/data --output=examples/partition1,examples/partition2
+./bin/tc --source=examples/data --output=examples/partition1,examples/partition2
 ```
 
 - `--source=<path>`: Specifies the source directory containing the files you want to partition.
@@ -87,16 +87,16 @@ To use the CLI tool, run the following command to create partitions:
 ### Important Notes
 
 - All flags are required. You must specify both `--source` and `--output`.
-- Multiple output directories allow for distributing files across partitions. The more output directories you provide, the more partitions treecut will create.
+- Multiple output directories allow for distributing files across partitions. The more output directories you provide, the more partitions tc will create.
 - Files will not be copied, only symbolic links will be created in the output directories, saving disk space.
 
 To remove partitions, run the following command:
 
 ```bash
-./bin/treecut --unlink --output=examples/partition1,examples/partition2
+./bin/tc --unlink --output=examples/partition1,examples/partition2
 ```
 
-## Why Treecut?
+## Why You Need tc?
 
 Symbolic links can be created manually using the native `ln` command in Linux/macOS:
 
@@ -104,7 +104,7 @@ Symbolic links can be created manually using the native `ln` command in Linux/ma
 ln -s /path/to/source /path/to/link
 ```
 
-While `ln` works well for individual files and directories, batch creating symlinks for an entire directory tree while ensuring balanced partitioning is difficult. This is where treecut comes in.
+While `ln` works well for individual files and directories, batch creating symlinks for an entire directory tree while ensuring balanced partitioning is difficult. This is where tc comes in.
 
 If you want to partition a large directory into multiple subdirectories using `ln`, you would need a custom script like this:
 
@@ -127,22 +127,22 @@ That looks tedious..
 - There's no built-in way to balance by file size.
 - The script can get complex when dealing with nested directories.
 
-With treecut, the same task is effortless:
+With tc, the same task is effortless:
 
 ```bash
-./bin/treecut --source=examples/data --output=examples/partition1,examples/partition2
+./bin/tc --source=examples/data --output=examples/partition1,examples/partition2
 ```
 
 - Automatically partitions files by count or size.
 - Works recursively on nested directories.
 - No scripting required, just run a single command.
-- Cross-platform support: Unlike `ln`, which is not available on Windows, treecut works on Windows, macOS, and Linux.
+- Cross-platform support: Unlike `ln`, which is not available on Windows, tc works on Windows, macOS, and Linux.
 
-Since treecut wraps around the same core idea as `ln` but adds automation, cross-platform support, and partitioning logic, it serves as a better alternative when dealing with large file trees.
+Since tc wraps around the same core idea as `ln` but adds automation, cross-platform support, and partitioning logic, it serves as a better alternative when dealing with large file trees.
 
 ## License
 
-This tool is open-source and available under the [MIT License](https://github.com/ezrantn/treecut/blob/main/LICENSE).
+This tool is open-source and available under the [MIT License](https://github.com/ezrantn/tc/blob/main/LICENSE).
 
 ## Contributing
 

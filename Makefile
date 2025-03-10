@@ -1,4 +1,4 @@
-BINARY_NAME=treecut
+BINARY_NAME=tc
 PKG=.
 OUTPUT_DIR=bin
 EXECUTABLE_FILE=cmd/main.go

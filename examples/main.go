@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/ezrantn/treecut"
+	"github.com/ezrantn/tc"
 )
 
 // This is a code example of how to use this library. In the `examples` directory, I created a `data` folder
@@ -14,13 +14,13 @@ import (
 func main() {
 	// Create partition example:
 	//
-	config := treecut.PartitionConfig{
+	config := tc.PartitionConfig{
 		SourceDir:  "examples/data",
 		OutputDirs: []string{"examples/partition1", "examples/partition2"},
 		BySize:     false,
 	}
 
-	if err := treecut.MakePartitions(config); err != nil {
+	if err := tc.MakePartitions(config); err != nil {
 		log.Fatal(err)
 	}
 
@@ -28,7 +28,7 @@ func main() {
 	//
 	outputDirs := []string{"examples/partition1", "examples/partition2"}
 	// outputDirsFalse := []string{"examples/false_dir"}
-	if err := treecut.RemovePartitions(outputDirs); err != nil {
+	if err := tc.RemovePartitions(outputDirs); err != nil {
 		log.Fatal(err)
 	}
 }

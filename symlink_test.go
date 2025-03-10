@@ -1,4 +1,4 @@
-package treecut
+package tc
 
 import (
 	"os"

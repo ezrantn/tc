@@ -1,6 +1,6 @@
 package benches
 
-// This file consists of benchmarks for the `treecut` program.
+// This file consists of benchmarks for the `tc` program.
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/ezrantn/treecut"
+	"github.com/ezrantn/tc"
 )
 
 func createTestFiles(t *testing.T, dir string, filenames []string) {
@@ -55,7 +55,7 @@ func BenchmarkMakePartitions(b *testing.B) {
 		}
 	}
 
-	config := treecut.PartitionConfig{
+	config := tc.PartitionConfig{
 		SourceDir:  originalDir,
 		OutputDirs: outputDirs,
 		BySize:     false,
@@ -64,7 +64,7 @@ func BenchmarkMakePartitions(b *testing.B) {
 	b.StartTimer() // Start timing after setup
 
 	for i := 0; i < b.N; i++ {
-		if err := treecut.MakePartitions(config); err != nil {
+		if err := tc.MakePartitions(config); err != nil {
 			b.Errorf("cannot create partition, something is wrong: %v", err)
 		}
 	}

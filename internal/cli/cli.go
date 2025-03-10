@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/ezrantn/treecut"
+	"github.com/ezrantn/tc"
 )
 
 var (
@@ -16,7 +16,7 @@ var (
 )
 
 // ParseCLI parses command-line arguments and returns a PartitionConfig.
-func ParseCLI() (treecut.PartitionConfig, bool, error) {
+func ParseCLI() (tc.PartitionConfig, bool, error) {
 	sourceDir := flag.String("source", "", "Source directory to partition")
 	outputDirs := flag.String("output", "", "Comma-separated list of output directories")
 	bySize := flag.Bool("by-size", false, "Partition files by size")
@@ -27,32 +27,32 @@ func ParseCLI() (treecut.PartitionConfig, bool, error) {
 	// Unlink mode (removing partitions)
 	if *unlink {
 		if *outputDirs == "" {
-			return treecut.PartitionConfig{}, false, errors.New("missing required --output flag for unlink mode")
+			return tc.PartitionConfig{}, false, errors.New("missing required --output flag for unlink mode")
 		}
 
 		outputDirsList, err := splitOutputDirs(*outputDirs)
 		if err != nil {
-			return treecut.PartitionConfig{}, false, fmt.Errorf("invalid output directories: %w", err)
+			return tc.PartitionConfig{}, false, fmt.Errorf("invalid output directories: %w", err)
 		}
 
-		return treecut.PartitionConfig{OutputDirs: outputDirsList}, true, nil
+		return tc.PartitionConfig{OutputDirs: outputDirsList}, true, nil
 	}
 
 	// Regular partitioning mode
 	if *sourceDir == "" {
-		return treecut.PartitionConfig{}, false, errors.New("missing required --source flag")
+		return tc.PartitionConfig{}, false, errors.New("missing required --source flag")
 	}
-	
+
 	if *outputDirs == "" {
-		return treecut.PartitionConfig{}, false, errors.New("missing required --output flag")
+		return tc.PartitionConfig{}, false, errors.New("missing required --output flag")
 	}
 
 	outputDirsList, err := splitOutputDirs(*outputDirs)
 	if err != nil {
-		return treecut.PartitionConfig{}, false, fmt.Errorf("invalid output directories: %w", err)
+		return tc.PartitionConfig{}, false, fmt.Errorf("invalid output directories: %w", err)
 	}
 
-	return treecut.PartitionConfig{
+	return tc.PartitionConfig{
 		SourceDir:  *sourceDir,
 		OutputDirs: outputDirsList,
 		BySize:     *bySize,
