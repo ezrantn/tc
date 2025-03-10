@@ -104,7 +104,7 @@ To remove partitions, run the following command:
 ./bin/tc --unlink --output=examples/partition1,examples/partition2
 ```
 
-## Why You Need tc?
+## Why Use tc?
 
 Symbolic links can be created manually using the native `ln` command in Linux/macOS:
 
