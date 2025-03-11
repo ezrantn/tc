@@ -122,9 +122,9 @@ func hasTrailingDotOrSpace(filename string) bool {
 
 // collectFiles walks through the source directory and returns all file paths
 func collectFiles(sourceDir string) ([]string, error) {
-	filesChan := make(chan string, 100) // Buffered channel to reduce contention
+	filesChan := make(chan string, 100)
 	errChan := make(chan error, 1)
-	// Walk the directory in a separate goroutine
+
 	go func() {
 		defer close(filesChan)
 		errChan <- filepath.WalkDir(sourceDir, func(path string, d fs.DirEntry, err error) error {
@@ -162,30 +162,47 @@ func collectFiles(sourceDir string) ([]string, error) {
 
 // collectFilesWithSize collects file paths and sizes
 func collectFilesWithSize(sourceDir string) ([]fileInfo, error) {
+	filesChan := make(chan fileInfo, 100)
+	errChan := make(chan error, 1)
 	var files []fileInfo
-	err := filepath.WalkDir(sourceDir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
 
-		if !d.IsDir() {
-			info, err := d.Info()
+	go func() {
+		defer close(filesChan)
+		err := filepath.WalkDir(sourceDir, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
 			}
 
-			// Validate filename before adding it
-			if ok, _ := isValidFileName(filepath.Base(path)); !ok {
-				return errors.New("invalid file name: " + path)
+			if !d.IsDir() {
+				info, err := d.Info()
+				if err != nil {
+					return err
+				}
+
+				if ok, _ := isValidFileName(filepath.Base(path)); !ok {
+					return errors.New("invalid file name: " + path)
+				}
+
+				filesChan <- fileInfo{path: path, size: info.Size()}
 			}
 
-			files = append(files, fileInfo{path: path, size: info.Size()})
-		}
+			return nil
+		})
+		errChan <- err
+		close(errChan)
+	}()
 
-		return nil
-	})
+	// Read from filesChan
+	for file := range filesChan {
+		files = append(files, file)
+	}
 
-	return files, err
+	// Return error if any
+	if err := <-errChan; err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
 
 func collectFilesWithMimeType(sourceDir string) (map[string][]string, error) {
