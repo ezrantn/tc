@@ -22,15 +22,6 @@ func createTestFiles(t *testing.T, dir string, filenames []string) {
 	}
 }
 
-// Helper function to get map keys as slice
-func getMapKeys(m map[string][]string) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
 func TestCollectFiles(t *testing.T) {
 	tests := []struct {
 		name          string
