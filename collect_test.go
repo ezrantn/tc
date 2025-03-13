@@ -13,12 +13,10 @@ func createTestFiles(t *testing.T, dir string, filenames []string) {
 
 	for _, name := range filenames {
 		path := filepath.Join(dir, name)
-		f, err := os.Create(path)
+		err := os.WriteFile(path, []byte("test content"), 0644)
 		if err != nil {
 			t.Fatalf("failed to create test file: %v", err)
 		}
-
-		f.Close()
 	}
 }
 

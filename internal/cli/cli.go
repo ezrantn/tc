@@ -41,8 +41,8 @@ func ParseCLI() (trc.PartitionConfig, bool, error) {
 	bySize := flag.Bool("by-size", false, "Partition files by size")
 	flag.BoolVar(bySize, "b", false, "Shorthand for --by-size")
 
-	byType := flag.Bool("by-type", false, "Partition by type")
-	flag.BoolVar(byType, "t", false, "Shorthand for --by-type")
+	byFile := flag.Bool("by-type", false, "Partition by type")
+	flag.BoolVar(byFile, "t", false, "Shorthand for --by-type")
 
 	unlink := flag.Bool("unlink", false, "Unlink symlinks and remove the partition directories")
 	flag.BoolVar(unlink, "u", false, "Shorthand for --unlink")
@@ -86,7 +86,7 @@ func ParseCLI() (trc.PartitionConfig, bool, error) {
 		SourceDir:  *sourceDir,
 		OutputDirs: outputDirsList,
 		BySize:     *bySize,
-		ByType:     *byType,
+		ByFile:     *byFile,
 	}, false, nil
 }
 
