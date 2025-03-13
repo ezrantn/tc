@@ -120,7 +120,6 @@ func hasTrailingDotOrSpace(filename string) bool {
 	return regexp.MustCompile(`[.\s]+$`).MatchString(filename)
 }
 
-// collectFiles walks through the source directory and returns all file paths
 func collectFiles(sourceDir string) ([]string, error) {
 	filesChan := make(chan string, 100)
 	errChan := make(chan error, 1)
@@ -160,7 +159,6 @@ func collectFiles(sourceDir string) ([]string, error) {
 	return files, nil
 }
 
-// collectFilesWithSize collects file paths and sizes
 func collectFilesWithSize(sourceDir string) ([]fileInfo, error) {
 	filesChan := make(chan fileInfo, 100)
 	errChan := make(chan error, 1)
@@ -205,37 +203,29 @@ func collectFilesWithSize(sourceDir string) ([]fileInfo, error) {
 	return files, nil
 }
 
+// collectFilesWithMimeType collects files from the source directory and categorizes them by MIME type
 func collectFilesWithMimeType(sourceDir string) (map[string][]string, error) {
-	// Map to store MIME type partitions
 	mimeMap := make(map[string][]string)
 
-	// Walk through the source directory
 	err := filepath.Walk(sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		// Skip directories
-		if info.IsDir() {
+		if info.IsDir() || info.Size() == 0 {
 			return nil
 		}
 
-		// Skip empty files
-		if info.Size() == 0 {
-			fmt.Printf("%sSkipping empty file: %s%s\n", Yellow, path, Reset)
-			return nil
-		}
-
-		// Detect MIME type
+		// Detect MIME type using third-party library
 		mtype, err := mimetype.DetectFile(path)
 		if err != nil {
 			fmt.Printf("Failed to detect MIME for %s: %v\n", path, err)
 			return nil
 		}
 
-		// Extract main type (e.g., "image", "video", "text")
+		// Extract the category (e.g., "image", "video", etc.)
 		mainType := mtype.String()
-		category := mainType[:strings.Index(mainType, "/")] // Extract category
+		category := mainType[:strings.Index(mainType, "/")]
 		mimeMap[category] = append(mimeMap[category], path)
 
 		return nil

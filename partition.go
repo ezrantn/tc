@@ -7,6 +7,7 @@ import (
 	"sort"
 )
 
+// PartitionConfig holds the configuration for partitioning files
 type PartitionConfig struct {
 	SourceDir  string   // Original directory
 	OutputDirs []string // Partition directories
@@ -14,35 +15,38 @@ type PartitionConfig struct {
 	ByFile     bool     // Partition by MIME type
 }
 
+// MakePartitions partitions the files in the source directory according to the configuration.
 func MakePartitions(config PartitionConfig) error {
 	if len(config.OutputDirs) == 0 {
 		return errors.New("at least one output directory is required")
 	}
 
-	var err error
-
-	if config.ByFile {
-		err = partitionByFile(config.SourceDir, config.OutputDirs)
-	} else if config.BySize {
-		err = partitionBySize(config.SourceDir, config.OutputDirs)
-	} else {
-		err = partitionByType(config.SourceDir, config.OutputDirs)
-	}
-
+	partitionFn, err := getPartitionFunction(config.ByFile, config.BySize)
 	if err != nil {
-		return fmt.Errorf("partitioning failed: %w", err)
+		return err
 	}
 
-	return nil
+	return partitionFn(config.SourceDir, config.OutputDirs)
 }
 
+// getPartitionFunction returns the appropriate partition function based on the flags.
+func getPartitionFunction(byFile, bySize bool) (func(string, []string) error, error) {
+	switch {
+	case byFile:
+		return partitionByFile, nil
+	case bySize:
+		return partitionBySize, nil
+	default:
+		return partitionByType, nil
+	}
+}
+
+// RemovePartitions removes the partition directories and their symlinks.
 func RemovePartitions(outputDirs []string) error {
-	// Remove the symlink first
 	if err := removeSymlinkTree(outputDirs); err != nil {
 		return fmt.Errorf("failed to remove symlink tree: %w", err)
 	}
 
-	// Remove the partition directories
 	for _, dir := range outputDirs {
 		if err := os.RemoveAll(dir); err != nil {
 			return fmt.Errorf("failed to remove partition directory %s: %w", dir, err)
@@ -52,21 +56,21 @@ func RemovePartitions(outputDirs []string) error {
 	return nil
 }
 
-// partitionFiles splits a list of file paths into `partitions` equal groups
+// partitionFiles splits a list of file paths into equal-sized groups.
 func partitionFiles(files []string, partitions int) [][]string {
-	if partitions <= 0 {
+	if partitions <= 0 || len(files) == 0 {
 		return nil
 	}
 
-	// Preallocate slices with estimated capacity
 	result := make([][]string, partitions)
-	avgSize := (len(files) + partitions - 1) / partitions // Ceiling division
+	avgSize := (len(files) + partitions - 1) / partitions
 
+	// Preallocate capacity to avoid reallocations
 	for i := range result {
-		result[i] = make([]string, 0, avgSize) // Preallocate capacity
+		result[i] = make([]string, 0, avgSize)
 	}
 
-	// Distribute files into partitions
+	// Distribute files across partitions
 	for i, file := range files {
 		result[i%partitions] = append(result[i%partitions], file)
 	}
@@ -74,23 +78,9 @@ func partitionFiles(files []string, partitions int) [][]string {
 	return result
 }
 
-func partitionByFile(sourceDir string, outputDirs []string) error {
-	files, err := collectFiles(sourceDir)
-	if err != nil {
-		return fmt.Errorf("failed to collect files from %s: %w", sourceDir, err)
-	}
-
-	partitions := partitionFiles(files, len(outputDirs))
-
-	if err := createSymlinkTree(partitions, outputDirs); err != nil {
-		return fmt.Errorf("failed to create symlink tree: %w", err)
-	}
-
-	return nil
-}
-
+// partitionFilesBySize splits files into partitions while balancing their sizes.
 func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
-	if partitions <= 0 {
+	if partitions <= 0 || len(files) == 0 {
 		return nil
 	}
 
@@ -99,20 +89,12 @@ func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
 		return files[i].size > files[j].size
 	})
 
-	// Create partition buckets
 	result := make([][]fileInfo, partitions)
-	sizes := make([]int64, partitions) // Track partition sizes
+	sizes := make([]int64, partitions)
 
+	// Distribute files across partitions to balance the size
 	for _, file := range files {
-		// Find the partition with the smallest current size
-		minIndex := 0
-		for i := 1; i < partitions; i++ {
-			if sizes[i] < sizes[minIndex] {
-				minIndex = i
-			}
-		}
-
-		// Assign file to the partition
+		minIndex := findMinPartitionIndex(sizes)
 		result[minIndex] = append(result[minIndex], file)
 		sizes[minIndex] += file.size
 	}
@@ -120,6 +102,33 @@ func partitionFilesBySize(files []fileInfo, partitions int) [][]fileInfo {
 	return result
 }
 
+// findMinPartitionIndex returns the index of the partition with the smallest size.
+func findMinPartitionIndex(sizes []int64) int {
+	minIndex := 0
+	for i := 1; i < len(sizes); i++ {
+		if sizes[i] < sizes[minIndex] {
+			minIndex = i
+		}
+	}
+	return minIndex
+}
+
+// partitionByFile partitions files by their MIME type.
+func partitionByFile(sourceDir string, outputDirs []string) error {
+	files, err := collectFiles(sourceDir)
+	if err != nil {
+		return fmt.Errorf("failed to collect files from %s: %w", sourceDir, err)
+	}
+
+	partitions := partitionFiles(files, len(outputDirs))
+	if err := createSymlinkTree(partitions, outputDirs); err != nil {
+		return fmt.Errorf("failed to create symlink tree: %w", err)
+	}
+
+	return nil
+}
+
+// partitionBySize partitions files based on their size, attempting to balance partition sizes.
 func partitionBySize(sourceDir string, outputDirs []string) error {
 	files, err := collectFilesWithSize(sourceDir)
 	if err != nil {
@@ -127,7 +136,6 @@ func partitionBySize(sourceDir string, outputDirs []string) error {
 	}
 
 	partitions := partitionFilesBySize(files, len(outputDirs))
-
 	if err := createSymlinkTreeBySize(partitions, outputDirs); err != nil {
 		return fmt.Errorf("failed to create symlink tree by size: %w", err)
 	}
@@ -135,9 +143,9 @@ func partitionBySize(sourceDir string, outputDirs []string) error {
 	return nil
 }
 
+// partitionByType partitions files by their MIME type using round-robin distribution.
 func partitionByType(sourceDir string, destDirs []string) error {
 	mimeMap, err := collectFilesWithMimeType(sourceDir)
-
 	if err != nil {
 		return err
 	}
@@ -146,12 +154,11 @@ func partitionByType(sourceDir string, destDirs []string) error {
 		return errors.New("no destination directories provided")
 	}
 
-	// Round-robin distribution of files across multiple partitions
+	// Round-robin distribution of files across directories
 	i := 0
-	for file := range mimeMap {
+	for category, files := range mimeMap {
 		destDir := destDirs[i%len(destDirs)]
-		err := createSymlinkWithMimeType(map[string][]string{file: mimeMap[file]}, destDir)
-		if err != nil {
+		if err := createSymlinkWithMimeType(map[string][]string{category: files}, destDir); err != nil {
 			return err
 		}
 

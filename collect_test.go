@@ -7,19 +7,6 @@ import (
 	"testing"
 )
 
-// Helper function to create temporary test files
-func createTestFiles(t *testing.T, dir string, filenames []string) {
-	t.Helper()
-
-	for _, name := range filenames {
-		path := filepath.Join(dir, name)
-		err := os.WriteFile(path, []byte("test content"), 0644)
-		if err != nil {
-			t.Fatalf("failed to create test file: %v", err)
-		}
-	}
-}
-
 func TestCollectFiles(t *testing.T) {
 	tests := []struct {
 		name          string
@@ -102,10 +89,14 @@ func TestCollectFiles(t *testing.T) {
 			// Run collectFiles
 			files, err := collectFiles(testDir)
 
+			t.Logf("%v", tt.expectError)
+
 			if tt.expectError {
 				if err == nil {
 					t.Errorf("Expected an error but got none")
 				}
+
+				t.Logf("sampe sini")
 
 				return
 			}
