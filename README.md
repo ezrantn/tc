@@ -13,11 +13,12 @@
 
 `trc` (or treecut) is a Go library and CLI tool for splitting large file trees into smaller, more manageable subtrees using symbolic links. Whether you're organizing massive datasets, optimizing storage, or enabling parallel processing, `trc` helps you partition files efficiently without creating duplicates.
 
-It supports two partitioning methods:
+It supports three partitioning methods:
 
 - By file count → Each partition contains approximately the same number of files.
 - By file size → Each partition holds a roughly equal total file size.
-
+- By file type (default) → Each partition contains files by their MIME type.
+  
 If you’ve ever struggled with thousands (or millions) of files cluttering a single directory, you know how frustrating it can be. Large directories can slow down file operations, complicate backups, and overwhelm your storage system. `trc` provides a simple way to reorganize and distribute files efficiently.
 
 Partitioning a file tree can improve load balancing by spreading files across multiple storage devices, enable parallel processing by allowing batch jobs to run on subsets of files, and make dataset management easier by breaking large datasets into smaller chunks. It’s also useful for organizing files before migration, ensuring backups and transfers are faster and more reliable.
