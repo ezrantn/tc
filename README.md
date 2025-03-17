@@ -59,6 +59,11 @@ Via Homebrew (coming soon!)
 
 ## Usage
 
+> [!IMPORTANT]
+> For Windows users, turn on Developer Mode in your settings, as creating symlinks in Windows requires 
+> administrator privileges.
+> See [this guide](https://learn.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development) for instructions on how to turn on Developer Mode.
+
 Using `trc` as a library makes it easy to create partitions with symlinks:
 
 ```go
