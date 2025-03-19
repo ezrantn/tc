@@ -60,7 +60,7 @@ func TestCreateSymlinkTree(t *testing.T) {
 
 			// Create partition directories
 			var outputDirs []string
-			for i := 0; i < len(tt.partitions); i++ {
+			for i := range tt.partitions {
 				partitionDir := filepath.Join(tempDir, fmt.Sprintf("partition%d", i+1))
 				if err := os.Mkdir(partitionDir, os.ModePerm); err != nil {
 					t.Fatalf("error creating directory: %v", err)
@@ -145,7 +145,7 @@ func TestCreateSymlinkTreeBySize(t *testing.T) {
 
 			// Create partition directories
 			var outputDirs []string
-			for i := 0; i < len(tt.partitions); i++ {
+			for i := range tt.partitions {
 				partitionDir := filepath.Join(tempDir, fmt.Sprintf("partition%d", i+1))
 				if err := os.Mkdir(partitionDir, os.ModePerm); err != nil {
 					t.Fatalf("error creating directory: %v", err)

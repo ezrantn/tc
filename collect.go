@@ -20,68 +20,24 @@ type fileInfo struct {
 // Reserved characters and words for filename validation
 // See: https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words
 const (
-	characterFilter = `[\x00-\x1F\\/:*?"<>|@!]` // Some FAT systems don't allow @ and ! in filenames
-	defaultName     = "file"
-	maxLength       = 255
+	characterFilter      = `[\x00-\x1F\\/:*?"<>|@!]` // Some FAT systems don't allow @ and ! in filenames
+	defaultName          = "file"
+	maxLength            = 255
+	dosReservedNames     = "CON PRN AUX NUL CLOCK$ CONFIG$ SCREEN$ $IDLE$ COM0 COM1 COM2 COM3 COM4 COM5 COM6 COM7 COM8 COM9 LPT0 LPT1 LPT2 LPT3 LPT4 LPT5 LPT6 LPT7 LPT8 LPT9"
+	windowsReservedNames = "$Mft $MftMirr $LogFile $Volume $AttrDef $Bitmap $Boot $BadClus $Secure $Upcase $Extend $Quota $ObjId $Reparse"
 )
 
 var (
 	characterFilterRegex = regexp.MustCompile(characterFilter)
-
-	dosReservedNames = map[string]struct{}{
-		"CON":     {},
-		"PRN":     {},
-		"AUX":     {},
-		"NUL":     {},
-		"CLOCK$":  {},
-		"CONFIG$": {},
-		"SCREEN$": {},
-		"$IDLE$":  {},
-		"COM0":    {},
-		"COM1":    {},
-		"COM2":    {},
-		"COM3":    {},
-		"COM4":    {},
-		"COM5":    {},
-		"COM6":    {},
-		"COM7":    {},
-		"COM8":    {},
-		"COM9":    {},
-		"LPT0":    {},
-		"LPT1":    {},
-		"LPT2":    {},
-		"LPT3":    {},
-		"LPT4":    {},
-		"LPT5":    {},
-		"LPT6":    {},
-		"LPT7":    {},
-		"LPT8":    {},
-		"LPT9":    {},
-	}
-
-	windowsReservedNames = map[string]struct{}{
-		"$MFT":     {},
-		"$MFTMIRR": {},
-		"$LOGFILE": {},
-		"$VOLUME":  {},
-		"$ATTRDEF": {},
-		"$BITMAP":  {},
-		"$BOOT":    {},
-		"$BADCLUS": {},
-		"$SECURE":  {},
-		"$UPCASE":  {},
-		"$EXTEND":  {},
-		"$QUOTA":   {},
-		"$OBJID":   {},
-		"$REPARSE": {},
-	}
 )
 
 // isValidFileName ensures a file is not using reserved names and meets system constraints
 func isValidFileName(filename string) (bool, error) {
-	original := filename
+	if hasTrailingDotOrSpace(filename) {
+		return false, errors.New("filename has trailing dots or spaces")
+	}
+
 	filename = strings.TrimSpace(filename)
-	filename = strings.ToUpper(filename)
 
 	if filename == "" {
 		return false, errors.New("filename cannot be empty")
@@ -97,19 +53,21 @@ func isValidFileName(filename string) (bool, error) {
 
 	baseName := filenameWithoutExtension(filename)
 
-	if _, exists := dosReservedNames[baseName]; exists {
-		return false, errors.New("filename is a reserved DOS name")
-	}
-
-	if _, exists := windowsReservedNames[baseName]; exists {
-		return false, errors.New("filename is a reserved windows name")
-	}
-
-	if hasTrailingDotOrSpace(original) {
-		return false, errors.New("filename has trailing dots or spaces")
+	if isReservedName(baseName) {
+		return false, errors.New("filename is a reserved name")
 	}
 
 	return true, nil
+}
+
+func isReservedName(filename string) bool {
+	reservedNames := strings.Split(dosReservedNames+" "+windowsReservedNames, " ")
+	for _, reservedName := range reservedNames {
+		if strings.EqualFold(filename, reservedName) {
+			return true
+		}
+	}
+	return false
 }
 
 func filenameWithoutExtension(filename string) string {
@@ -117,7 +75,7 @@ func filenameWithoutExtension(filename string) string {
 }
 
 func hasTrailingDotOrSpace(filename string) bool {
-	return regexp.MustCompile(`[.\s]+$`).MatchString(filename)
+	return strings.HasSuffix(filename, ".") || strings.HasSuffix(filename, " ")
 }
 
 func collectFiles(sourceDir string) ([]string, error) {
